@@ -1,0 +1,118 @@
+
+
+import logging
+import sys
+import random
+
+from PySide6.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
+from PySide6.QtCore import Qt
+
+
+class AdWindow(QDialog):
+    """ This class represents an ad window. """
+
+    def __init__(self, adware, ad_slogan, parent=None):
+        super().__init__(parent)
+        self.adware = adware
+        self.setWindowTitle("HA!")
+
+        # Make sure the window stays on top
+        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.raise_()
+        self.activateWindow()
+
+        # Create layout with ad slogan
+        self.label = QLabel(ad_slogan)
+        layout = QVBoxLayout()
+        layout.addWidget(self.label)
+        self.setLayout(layout)
+
+    def closeEvent(self, event):
+        """ Allow closing, but spawn 5 more windows. """
+        for _ in range(5):
+            slogan = random.choice(self.adware.advert_slogans)
+            new_window = self.adware.create_ad_window(slogan)
+            self.adware.position_window_randomly(new_window)
+            self.adware.ad_windows.append(new_window)
+        event.accept()
+
+
+class Adware(QApplication):
+    """ Adware logic that manages ad windows. """
+
+    def __init__(self, args):
+        super().__init__(args)
+        self.ad_windows = []
+
+    @property
+    def advert_slogans(self):
+        return (
+            'Your computer has been pwned',
+            'Deleting your system32',
+            'You stooopid!',
+            'Your computer has been pwned',
+            'Deleting your system32',
+            'You stooopid!',
+            'Your computer has been pwned',
+            'Deleting your system32',
+            'You stooopid!',
+            'Your computer has been pwned',
+            'Deleting your system32',
+            'You stooopid!',
+            'Your computer has been pwned',
+            'Deleting your system32',
+            'You stooopid!',
+            'Your computer has been pwned',
+            'Deleting your system32',
+            'You stooopid!',
+            'Your computer has been pwned',
+            'Deleting your system32',
+            'You stooopid!',
+            'Your computer has been pwned',
+            'Deleting your system32',
+            'You stooopid!',
+            'Your computer has been pwned',
+            'Deleting your system32',
+            'You stooopid!',
+            'Your computer has been pwned',
+            'Deleting your system32',
+            'You stooopid!'
+        ) 
+
+    def create_ad_window(self, ad_slogan):
+        window = AdWindow(self, ad_slogan=ad_slogan)
+        window.show()
+        return window
+
+    def position_window_randomly(self, window):
+        screen = self.primaryScreen()
+        screen_geometry = screen.availableGeometry()
+        screen_width = screen_geometry.width()
+        screen_height = screen_geometry.height()
+
+        window.adjustSize()
+        window_width = window.width()
+        window_height = window.height()
+
+        max_x = max(0, screen_width - window_width)
+        max_y = max(0, screen_height - window_height)
+
+        x = random.randint(0, max_x)
+        y = random.randint(0, max_y)
+        window.move(x, y)
+
+    def show_ads(self, initial_count=10):
+        for _ in range(initial_count):
+            slogan = random.choice(self.advert_slogans)
+            window = self.create_ad_window(slogan)
+            self.position_window_randomly(window)
+            self.ad_windows.append(window)
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+
+    adware = Adware(sys.argv)
+    adware.show_ads(initial_count=10000)
+
+    sys.exit(adware.exec())
